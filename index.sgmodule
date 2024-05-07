@@ -1,0 +1,24 @@
+#!name=yêu cầu ngắt
+#!desc=Hỗ trợ thời gian/WiFi Thực hiện khi ngắt kết nối. Nhấp vào nút bảng điều khiển hoặc yêu cầu kill-active-requests.com Cài đặt yêu cầu ngắt tay. Yêu cầu hỗ trợ truyền các tham số phù hợp thông qua tham số URL REQ_RULE
+#!arguments=PANEL_NAME:Bảng điều khiển tự ngắt kết nối,CRON_SCRIPT_NAME:# Ngắt kết nối theo thời gian,CRON_EXP:*/1 * * * *,CRON_RULE:RULE-SET Telegram,CRON_NOTIFY:1,CRON_WAKE_SYSTEM:0,EVENT_SCRIPT_NAME:Ngắt kết nối khi mạng thay đổi,EVENT_NOTIFY:1,REQ_NOTIFY:1,TIMEOUT:10,ENGINE:auto,DISMISS:2,ICON:xmark.circle,ICON-COLOR:#C5424A,REQ_SCRIPT_NAME:Tự động yêu cầu ngắt kết nối
+#!arguments-desc=1 Để khởi động, 0 Để Đóng\n\nPANEL_NAME:\nTên bảng\nNếu bạn muốn tắt bảng điều khiển, Nhập #\n\nCRON_SCRIPT_NAME:\nTên kịch bản của yêu cầu ngắt thời gian\nNếu bạn muốn tắt tính năng này, hãy nhập #\nChặn mặc định\n\nCRON_EXP:\nBiểu thức cron để tạm dừng yêu cầu\n\nCRON_RULE:\nBiểu thức chính xác của yêu cầu tạm dừng\nDùng rule để so sánh yêu cầu\n\nCRON_NOTIFY:\nGửi thông báo khi yêu cầu ngắt kết nối\n\nCRON_WAKE_SYSTEM:\nyêu cầu tạm dừng wake-system\n\nEVENT_SCRIPT_NAME:\nTên của kịch bản bị ngắt kết nối khi mạng thay đổi\nĐể tắt khả năng ngắt kết nối khi mạng thay đổi, hãy nhập #\n\nEVENT_NOTIFY:\nGửi thông báo khi thay đổi mạng bị ngắt kết nối\n\nREQ_NOTIFY:\nGửi thông báo khi yêu cầu ngắt kết nối\n\nTIMEOUT:\nThời gian chờ, mặc định là 10 giây. Để cho phép thời gian chờ bên trong của tập lệnh quay trở lại nhanh hơn thời gian chờ của tập lệnh Surge, tập lệnh sẽ tự động trừ đi 1 giây bên trong.\n\nENGINE:\nMặc định là tự động sử dụng công cụ xem webview, công cụ này có thể được đặt để chỉ định jsc\n\nDISMISS:\nTự động loại bỏ thông báo sau một số giây đã đặt\n\nREQ_SCRIPT_NAME:\nTên tập lệnh để ngắt kết nối theo cách thủ công theo yêu cầu\nĐể tắt khả năng ngắt kết nối theo cách thủ công bằng cách yêu cầu, hãy nhập #
+
+[MITM]
+hostname = %APPEND% kill-active-requests.com
+
+[Script]
+# Cron
+{{{CRON_SCRIPT_NAME}}}=type=cron,cronexp="{{{CRON_EXP}}}",wake-system={{{CRON_WAKE_SYSTEM}}},timeout=120,script-path=https://raw.githubusercontent.com/finish475/kill-active-requests/main/index.js,timeout={{{TIMEOUT}}},argument="DISMISS={{{DISMISS}}}&TIMEOUT={{{TIMEOUT}}}&CRON_NOTIFY={{{CRON_NOTIFY}}}&CRON_RULE={{{CRON_RULE}}}&TYPE=CRON",engine={{{ENGINE}}}
+
+
+# Request
+{{{REQ_SCRIPT_NAME}}} = type=http-request,pattern=^https?:\/\/kill-active-requests\.com,script-path=https://raw.githubusercontent.com/finish475/kill-active-requests/main/index.js,timeout={{{TIMEOUT}}},argument="DISMISS={{{DISMISS}}}&TIMEOUT={{{TIMEOUT}}}&REQ_NOTIFY={{{REQ_NOTIFY}}}",engine={{{ENGINE}}}
+
+# Event
+{{{EVENT_SCRIPT_NAME}}} = type=event,event-name=network-changed,timeout=30,script-update-interval=3600,debug=false,enable=true,script-path=https://raw.githubusercontent.com/finish475/kill-active-requests/main/index.js,timeout={{{TIMEOUT}}},argument="DISMISS={{{DISMISS}}}&TIMEOUT={{{TIMEOUT}}}&EVENT_NOTIFY={{{EVENT_NOTIFY}}}",engine={{{ENGINE}}}
+
+# Panel
+{{{PANEL_NAME}}} = type=generic,timeout=30,script-path=https://raw.githubusercontent.com/finish475/kill-active-requests/main/index.js,timeout={{{TIMEOUT}}},argument="DISMISS={{{DISMISS}}}&TIMEOUT={{{TIMEOUT}}}&icon={{{ICON}}}&icon-color={{{ICON-COLOR}}}",engine={{{ENGINE}}}
+
+[Panel]
+{{{PANEL_NAME}}} = script-name={{{PANEL_NAME}}},update-interval=1
